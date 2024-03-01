@@ -2,6 +2,8 @@
 
 Game 1, Week 1 of the Weekly Game Challenge by [tarat](https://www.tarat.space/)
 
+Forked from [Marching Squares by missing-user](https://github.com/missing-user/marching_squares)
+
 - [How to play](#how-to-play)
 - [How to run](#how-to-run)
 - [Todos](#todos)
