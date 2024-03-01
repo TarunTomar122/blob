@@ -1,88 +1,142 @@
-var m = new MarchingSquares("canvas", {
-	circleRadius: 40,
-	stepFunc() {
-		if (!this.paused) {
-			this.moveCircles();
-			this.updateGridPoints();
-		}
-		this.drawLines();
-		this.drawPoints();
+var audio = new Audio('./scripts/muse.mp3');
 
-		this.endpoint = (2 * window.innerHeight) / 3;
-		this.startpoint = window.innerHeight / 8;
-
-		if (document.documentElement.scrollTop > this.endpoint + this.startpoint) {
-			m.paused = true;
-			this.ctx.globalAlpha = 0;
-		} else {
-			//blur = Math.max(0, lerp(document.documentElement.scrollTop - startpoint, 0, endpoint, 0, 12)); m.ctx.filter = ["blur(", blur, "px)"].join('');
-			this.ctx.globalAlpha = Math.max(
-				0,
-				lerp(
-					document.documentElement.scrollTop - this.startpoint,
-					0,
-					this.endpoint,
-					1,
-					0
-				)
-			);
-			this.paused = false;
-		}
-
-		if (this.showCircles) {
-			this.drawCircles();
-		}
-	}
-});
-
-var explanationSection = document.getElementById("explanation");
-setTimeout(() => {
-	explanationSection.classList.add("show");
-}, 2000);
-
-window.addEventListener("resize", m.setCanvasSize.bind(m));
-
-window.onscroll = function() {
-	scrollFunction();
-};
-
-function scrollFunction() {
-	if (document.documentElement.scrollTop > 10)
-		explanationSection.classList.add("show");
+// check if the user has a score in local storage
+var highScore = localStorage.getItem("highScore");
+if (highScore) {
+	document.getElementById("scorearea").innerText = "Your high score: " + Math.round(highScore/60, 2);
+	document.getElementById("scorearea").style.display = "block";
 }
 
-var gridValuesDemo = new MarchingSquares("gridValuesDemo", {
-	resolution: 50,
-	interpolation: false,
-	circleCount: 5,
-	circleRadius: 80,
-	stepFunc() {
-		this.moveCircles();
-		this.updateGridPoints();
-		this.drawCircles();
-		this.drawPoints();
+var gamePaused = true;
+var score = 0;
+
+function getDynamicParams() {
+
+	var acc = 0.18;
+	var circleCount = 26;
+	var circleRadius = 18;
+
+	// increase acc if the screen is huge
+	if (window.screen.width > 1730) {
+		acc = 0.35;
+		circleCount = 35;
+		circleRadius = 15;
 	}
-});
-var coarseNoInterp = new MarchingSquares("coarseNoInterp", {
-	resolution: 50,
-	circleCount: 5,
-	interpolation: false,
-	circleRadius: 80
-});
 
-var noInterp = new MarchingSquares("noInterp", {
-	resolution: 10,
-	circleCount: 5,
-	interpolation: false
-});
+	console.log(window.screen.width);
 
-var highResDemo = new MarchingSquares("highResDemo", {
-	resolution: 10,
-	circleCount: 8
-});
+	return {
+		acc,
+		circleCount,
+		circleRadius,
+		interpolation: true
+	};
+}
 
-var interpolatedDemo = new MarchingSquares("interpolatedDemo", {
-	resolution: 50,
-	circleCount: 5,
-	circleRadius: 80
-});
+
+const startGame = () => {
+	console.log("start game");
+	gamePaused = false;
+	score = 0;
+
+	audio.play();
+
+	// hide the contentarea and show the canvas
+	document.getElementById("contentarea").style.display = "none";
+	document.getElementById("leaderboard").style.display = "none";
+	document.getElementById("playarea").style.display = "block";
+	document.getElementById("scorearea").style.display = "block";
+	document.getElementById("endgamearea").style.display = "none";
+	var m = new MarchingSquares("canvas", {
+		...getDynamicParams(),
+		stepFunc() {
+
+			if(gamePaused) return;
+			this.moveCircles();
+			this.updateGridPoints();
+			this.drawLines();
+			// this.drawCircles();
+	
+			score++;
+			document.getElementById("scorearea").innerText = "Score: " + Math.round(score/60, 2);
+			if(score > highScore){
+				localStorage.setItem("highScore", score);
+				document.getElementById("scorearea").innerText = "Score: " + Math.round(score/60, 2);
+			}
+
+			// set the player invincible to false after 2 seconds
+			if (this.invincible) {
+				setTimeout(() => {
+					this.invincible = false;
+				}, 1500);
+			}
+		},
+		resetGame(){
+
+			audio.pause();
+			audio.currentTime = 0;
+
+			// hide the canvas and show the contentarea
+			gamePaused = true;
+			document.getElementById("scorearea").style.display = "none";
+			document.getElementById("contentarea").style.display = "none";
+			document.getElementById("playarea").style.display = "none";
+			this.removeEntities();
+
+			document.getElementById('endgamearea').style.display = 'flex';
+			// show my score as a div in the endgamearea
+			document.getElementById('endgamearea').innerHTML = `<h1>Your Score: ${Math.round(score/60, 2)}</h1>`;
+
+			// check if the user has a name in local storage
+			var name = localStorage.getItem("username");
+			
+			if (name == null) {
+
+				document.getElementById('endgamearea').innerHTML += `<p>Enter a username to submit your score on the leaderboard...</p>`;
+
+				// add a input field for user to enter their name
+				document.getElementById('endgamearea').innerHTML += `<input type="text" id="name" placeholder="username">`;
+				// add a button to submit the score
+				document.getElementById('endgamearea').innerHTML += `<button onclick="submitScore()">Submit</button></br>`;	
+
+				document.getElementById('endgamearea').innerHTML += `<p>or just play again maybe?</p>`;
+
+			}
+			else{
+				const name = localStorage.getItem("username");
+				// show a loading message
+				document.getElementById('endgamearea').innerHTML = `<p>Submitting score...</p>`;
+
+				window.saveScore(name, Math.round(score/60, 2)).then(() => {
+					
+					document.getElementById('endgamearea').innerHTML = `<h1>Your Score: ${Math.round(score/60, 2)}</h1>`;
+					document.getElementById('endgamearea').innerHTML += `<p>Score submitted!</p>`;
+					document.getElementById('endgamearea').innerHTML += `<button onclick="startGame()">Play Again</button>`;
+		
+				});
+			}
+			
+			// add a button to play again
+			document.getElementById('endgamearea').innerHTML += `<button onclick="startGame()">Play Again</button>`;
+
+			document.getElementById("leaderboard").style.display = "flex";
+
+		}
+	});
+}
+
+
+const submitScore = () => {
+	var name = document.getElementById("name").value;
+	localStorage.setItem("username", name);
+
+	// show a loading message
+	document.getElementById('endgamearea').innerHTML = `<p>Submitting score...</p>`;
+
+	window.saveScore(name, Math.round(score/60, 2)).then(() => {
+		window.updateLeaderBoard();
+		document.getElementById('endgamearea').innerHTML = `<h1>Your Score: ${Math.round(score/60, 2)}</h1>`;
+		document.getElementById('endgamearea').innerHTML += `<p>Score submitted!</p>`;
+		document.getElementById('endgamearea').innerHTML += `<button onclick="startGame()">Play Again</button>`;
+	});
+}

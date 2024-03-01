@@ -2,11 +2,15 @@ let dpr = window.devicePixelRatio || 1;
 
 class MarchingSquares {
 	constructor(canvasId, args = {}) {
+
 		this.main_canvas = document.getElementById(canvasId);
 		this.ctx = this.main_canvas.getContext("2d");
 		this.inputValues = args.inputValues || [];
 		this.gridValues = args.gridValues || [];
 		this.circles = args.circles || [];
+		this.acc = args.acc || 0.1;
+		this.mouseCircle = {x:0, y:0, gx:0, gy:0, r:10};
+		this.invincible = true;
 
 		// Get the size of the canvas in CSS pixels.
 		let rect = this.main_canvas.getBoundingClientRect();
@@ -26,6 +30,11 @@ class MarchingSquares {
 		if ("interpolation" in args) this.interpolation = args.interpolation;
 		else this.interpolation = true;
 
+		document.addEventListener('mousemove', (ev) => {
+			this.mouseCircle.gx = ev.clientX;
+			this.mouseCircle.gy = ev.clientY;
+		});
+
 		this.stepFunc =
 			args.stepFunc ||
 			(() => {
@@ -36,31 +45,12 @@ class MarchingSquares {
 				this.drawPoints();
 			});
 
-		console.log(
-			"initialized MarchingSquares class for",
-			this.main_canvas,
-			"with arguments",
-			args
-		);
+		this.resetGame = args.resetGame;
 
 		//start everything up
 		this.generateMap();
 		this.generateCircles();
 		requestAnimationFrame(this.stepSimulation.bind(this));
-	}
-
-	setCanvasSize() {
-		// Get the size of the canvas in CSS pixels.
-		let rect = this.main_canvas.getBoundingClientRect();
-		// Give the canvas pixel dimensions of their CSS size * the device pixel ratio.
-		this.main_canvas.width = rect.width * dpr;
-		this.main_canvas.height = rect.height * dpr;
-		this.ctx.scale(dpr, dpr);
-
-		this.width = rect.width;
-		this.height = rect.height;
-		this.generateMap();
-		this.generateCircles();
 	}
 
 	//initialization methods
@@ -110,24 +100,10 @@ class MarchingSquares {
 			circle.y += circle.vy;
 
 			//bounce the circles off walls
-			if (circle.x + circle.r > this.width) circle.vx = -Math.abs(circle.vx);
-			else if (circle.x - circle.r < 0) circle.vx = Math.abs(circle.vx);
-			if (circle.y + circle.r > this.height) circle.vy = -Math.abs(circle.vy);
-			else if (circle.y - circle.r < 0) circle.vy = Math.abs(circle.vy);
-		}
-
-		let rect = this.main_canvas.getBoundingClientRect();
-		let x = mouseCircle.gx - rect.left;
-		x *= this.width / rect.width;
-		let y = mouseCircle.gy - rect.top;
-		y *= this.height / rect.height;
-
-		mouseCircle.x = x;
-		mouseCircle.y = y;
-
-		if (x > 0 && x < rect.width && y > 0 && y < rect.height) {
-			this.circles[0].x = x;
-			this.circles[0].y = y;
+			if (circle.x  > this.width) circle.vx = -Math.abs(circle.vx);
+			else if (circle.x< 0) circle.vx = Math.abs(circle.vx);
+			if (circle.y  > this.height) circle.vy = -Math.abs(circle.vy);
+			else if (circle.y< 0) circle.vy = Math.abs(circle.vy);
 		}
 	}
 
@@ -186,9 +162,19 @@ class MarchingSquares {
 		}
 	}
 
+
 	line(from, to) {
+
+		// make the lines gradient
+		this.ctx.beginPath();
+		
+		// choose a random color
+		this.ctx.strokeStyle = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`;
+
+		this.ctx.lineWidth = 2;
 		this.ctx.moveTo(from[0], from[1]);
 		this.ctx.lineTo(to[0], to[1]);
+		this.ctx.stroke();
 	}
 
 	drawLines() {
@@ -225,42 +211,53 @@ class MarchingSquares {
 					case 1:
 					case 14:
 						this.line(d, c);
+						this.detectCollision(d, c);
 						break;
 
 					case 2:
 					case 13:
 						this.line(b, c);
+						this.detectCollision(b, c);
 						break;
 
 					case 3:
 					case 12:
 						this.line(d, b);
+						this.detectCollision(d, b);
 						break;
 
 					case 11:
 					case 4:
 						this.line(a, b);
+						this.detectCollision(a, b);
 						break;
 
 					case 5:
 						this.line(d, a);
 						this.line(c, b);
+						this.detectCollision(d, a);
+						this.detectCollision(c, b);
 						break;
 					case 6:
 					case 9:
 						this.line(c, a);
+						this.detectCollision(c, a);
 						break;
 
 					case 7:
 					case 8:
 						this.line(d, a);
+						this.detectCollision(d, a);
 						break;
 
 					case 10:
 						this.line(a, b);
 						this.line(c, d);
+						this.detectCollision(a, b);
+						this.detectCollision(c, d);
 						break;
 					default:
+						// this.drawGradient([x * this.rez, y * this.rez], [(x + 1) * this.rez, (y + 1) * this.rez]);
 						break;
 				}
 			}
@@ -268,10 +265,55 @@ class MarchingSquares {
 		this.ctx.stroke();
 	}
 
+	removeEntities() {
+		this.circles = [];
+		this.inputValues = [];
+		this.gridValues = [];
+	}
+
+	detectCollision(a, b) {
+		
+		// do nothing if the player is invincible
+		if (this.invincible) return;
+
+		// detect collision and pause the game
+		if (
+			Math.abs(this.mouseCircle.gx - a[0]) < this.mouseCircle.r &&
+			Math.abs(this.mouseCircle.gy - a[1]) < this.mouseCircle.r
+		) {	
+			this.resetGame();
+			return;
+		}
+		if (
+			Math.abs(this.mouseCircle.gx - b[0]) < this.mouseCircle.r &&
+			Math.abs(this.mouseCircle.gy - b[1]) < this.mouseCircle.r
+		) {
+			this.resetGame();
+			return;
+		}
+	}
+
 	stepSimulation() {
+
 		//draw stuff
 		this.ctx.clearRect(0, 0, this.width, this.height);
 		this.stepFunc();
+
+		// increase vx and vy by 1 point every frame for all the circles
+		this.circles.forEach((circle) => {
+			circle.vx += this.acc * (Math.random() - 0.5);
+			circle.vy += this.acc * (Math.random() - 0.5);
+		});
+
+		// draw mouse circle as a dot feathering out
+		this.ctx.beginPath();
+		this.ctx.arc(this.mouseCircle.gx, this.mouseCircle.gy, this.mouseCircle.r, 0, 2 * Math.PI);
+		this.ctx.fillStyle = primary;
+		if(this.invincible){
+			// make it so that it blinks when the player is invincible
+			this.ctx.fillStyle = Math.floor(Date.now() / 100) % 2 ? primary : secondary;
+		}
+		this.ctx.fill();
 
 		requestAnimationFrame(this.stepSimulation.bind(this));
 	}
@@ -289,10 +331,3 @@ function binaryToType(nw, ne, se, sw) {
 	a = [nw, ne, se, sw];
 	return a.reduce((res, x) => (res << 1) | x);
 }
-
-window.addEventListener("mousemove", ev => {
-	mouseCircle.gx = ev.clientX;
-	mouseCircle.gy = ev.clientY;
-});
-
-var mouseCircle = {};

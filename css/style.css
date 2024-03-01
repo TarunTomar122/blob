@@ -13,6 +13,72 @@
   opacity: 0;
 }
 
+#titlearea{
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1rem;
+  color: white;
+  font-size: 2rem;
+}
+
+#playButton{
+  cursor: pointer;
+}
+
+#scorearea{
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 1rem;
+  color: white;
+  font-size: 2rem;
+}
+
+#endgamearea{
+  display: none;
+  padding-top: 10vh;
+  padding-bottom: 4rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#contentarea{
+  display: flex;
+  padding-top: 15vh;
+  padding-bottom: 4rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#leaderboard{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-top: #ffc40062 solid 1px;
+  padding-top: 4rem;
+}
+
+#contentarea h3{
+  font-size: 5rem;
+  color: #ffc400;
+}
+
+input {
+  width: 25%;
+}
+
+#name{
+  color: white;
+}
+
+#playarea{
+  display: none;
+}
+
 .show {
   animation: fadeInBottom 0.5s ease-out both;
 }
