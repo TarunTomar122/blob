@@ -56,8 +56,7 @@ const startGame = () => {
 			this.updateGridPoints();
 			this.drawLines();
 			// this.drawCircles();
-	
-			score++;
+
 			document.getElementById("scorearea").innerText = "Score: " + Math.round(score/60, 2);
 
 			// set the player invincible to false after 2 seconds
@@ -65,6 +64,8 @@ const startGame = () => {
 				setTimeout(() => {
 					this.invincible = false;
 				}, 1500);
+			}else{
+				score++;
 			}
 		},
 		resetGame(){
@@ -114,7 +115,7 @@ const startGame = () => {
 			
 			// console.log("game reset", score, localStorage.getItem("highScore"));
 
-			if(Math.round(score/60, 2) > parseInt(localStorage.getItem("highScore"))){	
+			if(localStorage.getItem("highScore") == undefined || Math.round(score/60, 2) > parseInt(localStorage.getItem("highScore"))){	
 				localStorage.setItem("highScore", Math.round(score/60, 2));
 			}
 
