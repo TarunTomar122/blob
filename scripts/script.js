@@ -134,7 +134,6 @@ const submitScore = () => {
 	document.getElementById('endgamearea').innerHTML = `<p>Submitting score...</p>`;
 
 	window.saveScore(name, Math.round(score/60, 2)).then(() => {
-		window.updateLeaderBoard();
 		document.getElementById('endgamearea').innerHTML = `<h1>Your Score: ${Math.round(score/60, 2)}</h1>`;
 		document.getElementById('endgamearea').innerHTML += `<p>Score submitted!</p>`;
 		document.getElementById('endgamearea').innerHTML += `<button onclick="startGame()">Play Again</button>`;

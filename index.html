@@ -90,7 +90,7 @@
           return;
         }
 
-        const data = docc.data();
+        let data = docc.data();
         if (data[name]) {
           if (data[name] < score) {
             // update the score if the new score is higher
@@ -106,7 +106,7 @@
           setDoc(doc(leaderboardRef, "leaderboard"), {
             [name]: score
           }, { merge: true });
-          data[name] = score;
+          data = {...data, [name]: score};
         }
 
         // data is an object with key as name and value as the highscore
