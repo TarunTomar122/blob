@@ -67,6 +67,13 @@ const startGame = () => {
 			}else{
 				score++;
 			}
+
+			if(Math.round(score/60, 2) > 80 ){
+				this.resetGame();
+				// show an alert 
+				alert("HACKER hai bhai Hacker hai...");
+			}
+
 		},
 		resetGame(){
 
