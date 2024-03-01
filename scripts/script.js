@@ -3,7 +3,7 @@ var audio = new Audio('./scripts/muse.mp3');
 // check if the user has a score in local storage
 var highScore = localStorage.getItem("highScore");
 if (highScore) {
-	document.getElementById("scorearea").innerText = "Your high score: " + Math.round(highScore/60, 2);
+	document.getElementById("scorearea").innerText = "Your high score: " + highScore;
 	document.getElementById("scorearea").style.display = "block";
 }
 
@@ -59,10 +59,6 @@ const startGame = () => {
 	
 			score++;
 			document.getElementById("scorearea").innerText = "Score: " + Math.round(score/60, 2);
-			if(score > highScore){
-				localStorage.setItem("highScore", score);
-				document.getElementById("scorearea").innerText = "Score: " + Math.round(score/60, 2);
-			}
 
 			// set the player invincible to false after 2 seconds
 			if (this.invincible) {
@@ -116,6 +112,12 @@ const startGame = () => {
 				});
 			}
 			
+			// console.log("game reset", score, localStorage.getItem("highScore"));
+
+			if(Math.round(score/60, 2) > parseInt(localStorage.getItem("highScore"))){	
+				localStorage.setItem("highScore", Math.round(score/60, 2));
+			}
+
 			// add a button to play again
 			document.getElementById('endgamearea').innerHTML += `<button onclick="startGame()">Play Again</button>`;
 
