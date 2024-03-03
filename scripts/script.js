@@ -68,7 +68,7 @@ const startGame = () => {
 				score++;
 			}
 
-			if(Math.round(score/60, 2) > 80 ){
+			if(Math.round(score/60, 2) > 100 ){
 				this.resetGame();
 				// show an alert 
 				alert("HACKER hai bhai Hacker hai...");
@@ -148,6 +148,6 @@ const submitScore = () => {
 		document.getElementById('endgamearea').innerHTML = `<h1>Your Score: ${Math.round(score/60, 2)}</h1>`;
 		document.getElementById('endgamearea').innerHTML += `<p>You are ranked <span style="color: #ffc400">${window.rank}</span> on the leaderboard!</p>`;
 		document.getElementById('endgamearea').innerHTML += `<button onclick="startGame()">Play Again</button>`;
-		
+
 	});
 }
