@@ -114,7 +114,7 @@ const startGame = () => {
 				window.saveScore(name, Math.round(score/60, 2)).then(() => {
 					
 					document.getElementById('endgamearea').innerHTML = `<h1>Your Score: ${Math.round(score/60, 2)}</h1>`;
-					document.getElementById('endgamearea').innerHTML += `<p>Score submitted!</p>`;
+					document.getElementById('endgamearea').innerHTML += `<p>You are ranked <span style="color: #ffc400">${window.rank}</span> on the leaderboard!</p>`;
 					document.getElementById('endgamearea').innerHTML += `<button onclick="startGame()">Play Again</button>`;
 		
 				});
@@ -144,8 +144,10 @@ const submitScore = () => {
 	document.getElementById('endgamearea').innerHTML = `<p>Submitting score...</p>`;
 
 	window.saveScore(name, Math.round(score/60, 2)).then(() => {
+		
 		document.getElementById('endgamearea').innerHTML = `<h1>Your Score: ${Math.round(score/60, 2)}</h1>`;
-		document.getElementById('endgamearea').innerHTML += `<p>Score submitted!</p>`;
+		document.getElementById('endgamearea').innerHTML += `<p>You are ranked <span style="color: #ffc400">${window.rank}</span> on the leaderboard!</p>`;
 		document.getElementById('endgamearea').innerHTML += `<button onclick="startGame()">Play Again</button>`;
+		
 	});
 }

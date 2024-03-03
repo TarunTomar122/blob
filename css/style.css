@@ -60,12 +60,25 @@
   align-items: center;
   border-top: #ffc40062 solid 1px;
   padding-top: 4rem;
+  margin-bottom: 4rem;
 }
 
 ul{
   list-style-type: none;
   padding: 0;
   align-items: start;
+  max-height: 30vh;
+  overflow-y: auto;
+  border: #ffc40062 solid 1px;
+  padding-left: 4rem;
+  padding-right: 4rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* Make scrollbar transparent */
 }
 
 #contentarea h3{

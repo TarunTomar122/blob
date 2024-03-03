@@ -62,7 +62,7 @@
         leaderboardList.innerHTML = "";
 
         // pick the top 5 scores
-        sortedData = sortedData.slice(0, 5);
+        // sortedData = sortedData.slice(0, 5);
 
         let i = 0;
         sortedData.forEach((entry) => {
@@ -81,15 +81,12 @@
           else if(i==2){
             li.innerHTML = `🥉 ${entry[0]} - ${entry[1]}`;
           }
-          // thumbs up emoji for 4th rank
-          else if (i==3) {
-            li.innerHTML = `👍 ${entry[0]} - ${entry[1]}`;
-          }
-          // potty emoji for last rank
           else{
-            li.innerHTML = `🚽 ${entry[0]} - ${entry[1]}`;
+            li.innerHTML = `${i+1}. ${entry[0]} - ${entry[1]}`;
+            if(entry[0] == localStorage.getItem("username")){
+              li.style.color = "#fcaf3e";
+            }
           }
-
           leaderboardList.appendChild(li);
           i++;
         });
@@ -139,10 +136,11 @@
         var sortedData = Object.entries(data).sort((a, b) => b[1] - a[1]);
         leaderboardList.innerHTML = "";
 
-        // pick the top 5 scores
-        sortedData = sortedData.slice(0, 5);
+         // pick the top 5 scores
+        // sortedData = sortedData.slice(0, 5);
 
         let i = 0;
+        let rank = 0;
         sortedData.forEach((entry) => {
           const li = document.createElement("li");
           li.textContent = `${entry[0]} - ${entry[1]}`;
@@ -159,19 +157,18 @@
           else if(i==2){
             li.innerHTML = `🥉 ${entry[0]} - ${entry[1]}`;
           }
-          // thumbs up emoji for 4th rank
-          else if (i==3) {
-            li.innerHTML = `👍 ${entry[0]} - ${entry[1]}`;
-          }
-          // potty emoji for last rank
           else{
-            li.innerHTML = `🚽 ${entry[0]} - ${entry[1]}`;
+            li.innerHTML = `${i+1}. ${entry[0]} - ${entry[1]}`;
+            if(entry[0] == localStorage.getItem("username")){
+              li.style.color = "#fcaf3e";
+              rank = i+1;
+            }
           }
-
           leaderboardList.appendChild(li);
           i++;
         });
 
+        window.rank = rank;
 
       });
 
