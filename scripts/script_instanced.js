@@ -35,6 +35,12 @@ class MarchingSquares {
 			this.mouseCircle.gy = ev.clientY;
 		});
 
+		// write another event listener for the touchmove event
+		document.addEventListener('touchmove', (ev) => {
+			this.mouseCircle.gx = ev.touches[0].clientX;
+			this.mouseCircle.gy = ev.touches[0].clientY;
+		});
+
 		this.stepFunc =
 			args.stepFunc ||
 			(() => {
